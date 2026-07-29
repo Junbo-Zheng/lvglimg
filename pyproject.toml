@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2026 Junbo Zheng
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lvglimg"
+dynamic = ["version"]
+description = "Decode LVGL .bin image files (v8 + v9, NONE/RLE/LZ4/LZ4_HC) to PNG"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Junbo Zheng", email = "3273070@qq.com" },
+]
+keywords = ["lvgl", "image", "bin", "png", "decoder", "embedded", "gui"]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "Pillow>=10.0",
+    "lz4>=4.0",
+]
+
+[project.optional-dependencies]
+auto = ["numpy>=1.24"]  # size auto-detection for headerless raw buffers
+dev = [
+    "numpy>=1.24",
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "build",
+    "twine",
+]
+
+[project.scripts]
+lvglimg = "lvglimg.cli:main"
+lvimg = "lvglimg.cli:main"  # short alias
+
+[project.urls]
+Homepage = "https://github.com/Junbo-Zheng/lvglimg"
+Issues = "https://github.com/Junbo-Zheng/lvglimg/issues"
+
+# Single source of truth for the version: read it from __init__.py so the
+# number lives in exactly one place (no pyproject/__init__ drift on bumps).
+[tool.hatch.version]
+path = "src/lvglimg/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lvglimg"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+# E+F = pycodestyle errors + pyflakes (the flake8 defaults); I = isort import sorting
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# main.py shim must insert sys.path before the package import (E402 expected)
+"main.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --strict-markers"
+# Import the package straight from src/ so `pytest` runs against the working
+# tree with no build/install step, and always shadows any site-packages copy.
+pythonpath = ["src"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/lvglimg"]
+ignore_missing_imports = true
